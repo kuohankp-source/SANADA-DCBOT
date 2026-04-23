@@ -1,0 +1,4 @@
+gspread==6.0.0
+google-auth==2.26.2
+requests==2.31.0
+tenacity==8.2.3
