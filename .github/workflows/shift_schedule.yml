@@ -1,0 +1,35 @@
+name: Daily Shift Schedule
+
+on:
+  schedule:
+    # UTC 12:00 等於台灣時間 20:00 執行班表發送
+    - cron: '0 12 * * *'  
+  
+  workflow_dispatch:
+
+jobs:
+  run-shift-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Schedule Script
+      env:
+        # 共用 Google 鑰匙
+        GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        # 班表專屬的 Discord 頻道網址
+        DISCORD_SCHEDULE_WEBHOOK: ${{ secrets.DISCORD_SCHEDULE_WEBHOOK }}
+      # 💡 這裡指定執行我們剛建好的新程式
+      run: python schedule_bot.py
