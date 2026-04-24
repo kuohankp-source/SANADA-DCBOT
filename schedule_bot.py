@@ -43,7 +43,8 @@ def send_tomorrow_schedule():
         date_title = sheet.acell('K2').value                 # 明日日期
         schedule_block = sheet.get_values('I3:L8')           # 人員班表
         form_link_block = sheet.get_values('I9:J9')          # 表單名稱與網址
-        weather_block = sheet.get_values('I10:I20')          # 天氣預報
+       # 🎯 修正 1：把範圍擴大到 L22，確保絕對不會漏抓底部的網址
+        weather_block = sheet.get_values('I10:L22')          
         
         # 組合文字
         message_lines = [f"📅 **{date_title}**"]
@@ -60,11 +61,12 @@ def send_tomorrow_schedule():
             
         message_lines.append("") # 空行
         
-        # 天氣預報區塊
+        # 🎯 修正 2：把原本只抓 row[0] 的寫法，改成整列抓取並用空格組合
+        # 天氣預報與網頁連結區塊
         for row in weather_block:
-            if row: 
-                message_lines.append(row[0])
-                
+            line = " ".join([str(cell) for cell in row if cell])
+            if line: # 確保這行有字才加進去
+                message_lines.append(line)
         full_message = "\n".join(message_lines)
         
         # 取得專屬的班表 Webhook
