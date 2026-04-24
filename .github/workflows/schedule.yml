@@ -1,36 +1,12 @@
-name: Daily Discord Report
-
-on:
-  schedule:
-    # GitHub 使用 UTC 時間。台灣時間 (CST) 是 UTC+8。
-    # 如果你想要在每天清晨 04:00 (台灣時間) 執行，這裡要減 8 小時，也就是 20:00 (UTC)
-    # 格式為: 分 時 日 月 星期
-    - cron: '0 20 * * *'  
-  
-  # 允許你可以在 GitHub 網頁上手動點擊執行 (方便測試)
-  workflow_dispatch:
-
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run Python script
-      env:
-        # 將 GitHub Secrets 注入為系統環境變數，給 Python 讀取
-        GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      run: python main.py
+# --- A. 讀取交接內容 ---
+        raw_data = sheet_continuous.get_values(store['read_range']) # 👈 改成讀取專屬範圍
+        
+        # ... (中間發送 DC 邏輯不變) ...
+        
+        # --- C. 在當日表進行本地備援 ---
+        sheet_daily.batch_clear(['A38:C50'])
+        sheet_daily.update_acell('A38', '【昨日交接紀錄備份】')
+        sheet_daily.update(store['backup_range'], raw_data) # 👈 改成寫入專屬範圍
+        
+        # --- D. 執行當日表的每日清除動作 ---
+        sheet_daily.batch_clear(store['clear_ranges']) # 👈 改成清空專屬範圍
