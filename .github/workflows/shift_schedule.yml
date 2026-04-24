@@ -2,8 +2,8 @@ name: Daily Shift Schedule
 
 on:
   schedule:
-    # 台灣時間 21:52 = UTC 13:52
-    - cron: '52 13 * * *'
+    # 台灣時間 23:52 = UTC 13:52
+    - cron: '52 15 * * *'
   
   workflow_dispatch:
 
