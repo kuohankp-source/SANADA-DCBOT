@@ -98,7 +98,7 @@ def process_handover(store):
         print(f"   ↳ 正在執行 {store['name']} 本地備份...")
         sheet_daily.batch_clear(['A38:C50'])
         sheet_daily.update_acell('A38', '【昨日交接紀錄備份】')
-        sheet_daily.update(store['backup_range'], raw_data)
+       sheet_daily.update(values=raw_data, range_name=store['backup_range'])
         
         # --- D. 執行當日表的每日清除動作 ---
         print(f"   ↳ 正在重置 {store['name']} 每日表單...")
