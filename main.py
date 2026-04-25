@@ -47,7 +47,7 @@ STORES = [
         "daily_id": "1Un-o2cTi7fpyN7uz3juml5XeFvU4zKSp_Qi2urWv6fc",
         "continuous_tab": "中友真田交接投櫃登錄(連續)",
         "daily_tab": "2-2交接、投櫃登錄",
-        "webhook_env": "DISCORD_WEBHOOK_SANADA", # 已對齊 YAML 設定
+        "webhook_env": "DISCORD_WEBHOOK_ZHONGYOU", # 已對齊 YAML 設定
         
          "read_range": "N2:O12",         # 讀取 11 行
         "backup_range": "A39:B49",       # 備份貼上的範圍
