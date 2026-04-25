@@ -1,12 +1,28 @@
-# --- A. 讀取交接內容 ---
-        raw_data = sheet_continuous.get_values(store['read_range']) # 👈 改成讀取專屬範圍
-        
-        # ... (中間發送 DC 邏輯不變) ...
-        
-        # --- C. 在當日表進行本地備援 ---
-        sheet_daily.batch_clear(['A38:C50'])
-        sheet_daily.update_acell('A38', '【昨日交接紀錄備份】')
-        sheet_daily.update(store['backup_range'], raw_data) # 👈 改成寫入專屬範圍
-        
-        # --- D. 執行當日表的每日清除動作 ---
-        sheet_daily.batch_clear(store['clear_ranges']) # 👈 改成清空專屬範圍
+name: Multi-Store Handover Report
+
+on:
+  schedule:
+    # 台灣時間 05:51 (21:51 UTC)
+    - cron: '51 21 * * *'
+  
+  workflow_dispatch:
+
+jobs:
+  run-handover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Multi-Store Script
+        env:
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          DISCORD_WEBHOOK_ZHONGYOU: ${{ secrets.DISCORD_WEBHOOK_ZHONGYOU }}
+          DISCORD_WEBHOOK_BEITUN: ${{ secrets.DISCORD_WEBHOOK_BEITUN }}
+          DISCORD_WEBHOOK_SONGZHU: ${{ secrets.DISCORD_WEBHOOK_SONGZHU }}
+        run: python main.py
