@@ -1,5 +1,5 @@
 name: Daily Shift Schedule
-
+# 20260427 強制刷新排程
 on:
   schedule:
     # 台灣時間 19:52 = UTC 11:52
