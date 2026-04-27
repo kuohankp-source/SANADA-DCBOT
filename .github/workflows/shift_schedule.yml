@@ -1,11 +1,14 @@
 name: Daily Shift Schedule
-# 20260427 強制刷新排程
+
 on:
-  schedule:
-    # 台灣時間 19:52 = UTC 11:52
-    - cron: '52 11 * * *'
-  
+  # 1. 外部訊號觸發 (GAS 會用這個叫醒它)
+  repository_dispatch:
+    types: [fire_shift_schedule]
+    
+  # 2. 保留手動按鈕
   workflow_dispatch:
+  
+  # (你可以把原本的 schedule 整個刪掉，因為我們以後不需要 GitHub 自己賴床的鬧鐘了)
 
 jobs:
   run-shift-script:
