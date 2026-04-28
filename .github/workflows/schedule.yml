@@ -1,11 +1,14 @@
 name: Multi-Store Handover Report
 
 on:
-  schedule:
-    # 台灣時間 05:51 (21:51 UTC)
-    - cron: '51 21 * * *'
-  
+  # 1. 接收 GAS 的精準喚醒訊號
+  repository_dispatch:
+    types: [fire_handover_report]
+    
+  # 2. 保留手動按鈕
   workflow_dispatch:
+  
+  # (把原本的 schedule: cron 整段刪掉，不讓 GitHub 自己排隊了)
 
 jobs:
   run-handover:
