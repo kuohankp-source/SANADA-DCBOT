@@ -21,12 +21,12 @@ STORES = [
         "name": "北屯店",
         "webhook_env": "DISCORD_WEBHOOK_BEITUN",
         "task_b": { # 客訂單資訊 (已根據新截圖填入正確ID與多重範圍)
-            "sheet_id": "1t1LCxJAB4BcRZTTwP2NAfcSRneZnCGjaaemntl9LlYo",
+            "sheet_id": "1t1LCxJAB4BcRZTTwP2NAfcSRneZnCGjaaemntl9LIYo",
             "tab_name": "待聯絡待取貨清單",
             "ranges": ["G1:G20", "J1:J4"] # 👈 支援多個不連續範圍自動往下接
         },
         "task_c": { # 詢問單狀態 (已根據新截圖填入正確ID與範圍)
-            "sheet_id": "1d18sp0XxTYKOuD8jigcjfnBW72H6wON-Cgrh4F219Ss",
+            "sheet_id": "1dl8sp0XxTYKOuD8jigcjfnbW72H6wON-Cgrh4F219Ss",
             "tab_name": "維修單/詢問單分類",
             "ranges": ["F1:F20"]
         }
