@@ -20,7 +20,7 @@ STORES = [
     {
         "name": "松竹店",
         "continuous_id": "1Bz-2K7aS74W338Q941-mL28RLURZ5ke6yp8tIv5ju9c", 
-        "daily_id": "1nJJ5fqS4rCHdkdVgsYt9x_0GW2bgbeMD-VTZdM1wUDY",      
+        "daily_id": "1nJJ5fqS4rCHdkdVgsYt9x_0GW2bgbeMD-VTZdM1wUDY",       
         "continuous_tab": "松竹真田交接投櫃登錄(連續)",
         "daily_tab": "2-2交接、投櫃登錄",
         "webhook_env": "DISCORD_WEBHOOK_SONGZHU",
@@ -72,6 +72,20 @@ def send_to_discord(webhook_url, msg, store_name):
 # ==========================================
 # 3. 核心處理引擎：讀取 ➔ 發送 ➔ 備份 ➔ 清空
 # ==========================================
+
+# 👇 增加三個頑強分身，分別保護 Google 的三種寫入動作
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), reraise=True)
+def safe_update_acell(worksheet, cell, value):
+    return worksheet.update_acell(cell, value)
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), reraise=True)
+def safe_batch_clear(worksheet, ranges):
+    return worksheet.batch_clear(ranges)
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), reraise=True)
+def safe_update(worksheet, values, range_name):
+    return worksheet.update(values=values, range_name=range_name)
+
 def process_handover(store):
     print(f"\n🚀 正在啟動【{store['name']}】的每日處理程序...")
     
@@ -94,21 +108,21 @@ def process_handover(store):
         webhook_url = os.environ.get(store['webhook_env'])
         send_to_discord(webhook_url, message, store['name'])
         
-        # --- C. 在當日表進行本地備援 ---
+        # --- C. 在當日表進行本地備援 (使用安全寫入) ---
         print(f"   ↳ 正在執行 {store['name']} 本地備份...")
-        sheet_daily.batch_clear(['A38:C50'])
-        sheet_daily.update_acell('A38', '【昨日交接紀錄備份】')
-        sheet_daily.update(values=raw_data, range_name=store['backup_range'])
+        safe_batch_clear(sheet_daily, ['A38:C50'])
+        safe_update_acell(sheet_daily, 'A38', '【昨日交接紀錄備份】')
+        safe_update(sheet_daily, values=raw_data, range_name=store['backup_range'])
         
-        # --- D. 執行當日表的每日清除動作 ---
+        # --- D. 執行當日表的每日清除動作 (使用安全寫入) ---
         print(f"   ↳ 正在重置 {store['name']} 每日表單...")
-        sheet_daily.batch_clear(store['clear_ranges'])
+        safe_batch_clear(sheet_daily, store['clear_ranges'])
         
         print(f"🎉 【{store['name']}】所有任務圓滿完成！")
         
     except Exception as e:
         print(f"🚨 嚴重警告：【{store['name']}】處理失敗，原因：{e}")
-        continue # 👈 改成 continue！讓程式跳過這家店的後續動作，直接繼續處理「下一家店」！
+        return # 👈 修正語法：在這裡使用 return 來結束錯誤狀態，主迴圈就會自動換下一家店！
 
 # ==========================================
 # 👑 啟動區：讓三家店排隊執行
