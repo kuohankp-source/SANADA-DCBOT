@@ -108,7 +108,7 @@ def process_handover(store):
         
     except Exception as e:
         print(f"🚨 嚴重警告：【{store['name']}】處理失敗，原因：{e}")
-        raise e
+        continue # 👈 改成 continue！讓程式跳過這家店的後續動作，直接繼續處理「下一家店」！
 
 # ==========================================
 # 👑 啟動區：讓三家店排隊執行
