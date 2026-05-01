@@ -2,6 +2,7 @@ import os
 import json
 import gspread
 import requests
+import time  # 👈 新增：引入時間模組，為系統提供呼吸空間
 from google.oauth2.service_account import Credentials
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -25,8 +26,8 @@ STORES = [
         "daily_tab": "2-2交接、投櫃登錄",
         "webhook_env": "DISCORD_WEBHOOK_SONGZHU",
         
-        "read_range": "N2:O12",          # 讀取 11 行
-        "backup_range": "A39:B49",       # 備份貼上的範圍
+        "read_range": "N2:O12",          
+        "backup_range": "A39:B49",       
         "clear_ranges": ['D2', 'C24', 'I2', 'H24', 'N2', 'M24', 'B4:B10', 'G4:G10', 'L4:L10', 'B15:B21', 'G15:G21', 'L15:L21']
     },
     {
@@ -37,8 +38,8 @@ STORES = [
         "daily_tab": "2-2交接、投櫃登錄",
         "webhook_env": "DISCORD_WEBHOOK_BEITUN",
         
-        "read_range": "N2:O12",          # 讀取 11 行
-        "backup_range": "A39:B49",       # 備份貼上的範圍
+        "read_range": "N2:O12",          
+        "backup_range": "A39:B49",       
         "clear_ranges": ['D2', 'C24', 'I2', 'H24', 'N2', 'M24', 'B4:B10', 'G4:G10', 'L4:L10', 'B15:B21', 'G15:G21', 'L15:L21']
     },
     {
@@ -47,10 +48,10 @@ STORES = [
         "daily_id": "1Un-o2cTi7fpyN7uz3juml5XeFvU4zKSp_Qi2urWv6fc",
         "continuous_tab": "中友真田交接投櫃登錄(連續)",
         "daily_tab": "2-2交接、投櫃登錄",
-        "webhook_env": "DISCORD_WEBHOOK_ZHONGYOU", # 已對齊 YAML 設定
+        "webhook_env": "DISCORD_WEBHOOK_ZHONGYOU", 
         
-         "read_range": "N2:O12",         # 讀取 11 行
-        "backup_range": "A39:B49",       # 備份貼上的範圍
+         "read_range": "N2:O12",         
+        "backup_range": "A39:B49",       
         "clear_ranges": ['D2', 'C24', 'I2', 'H24', 'N2', 'M24', 'B4:B10', 'G4:G10', 'L4:L10', 'B15:B21', 'G15:G21', 'L15:L21']
     }
 ]
@@ -73,7 +74,6 @@ def send_to_discord(webhook_url, msg, store_name):
 # 3. 核心處理引擎：讀取 ➔ 發送 ➔ 備份 ➔ 清空
 # ==========================================
 
-# 👇 增加三個頑強分身，分別保護 Google 的三種寫入動作
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=2, max=10), reraise=True)
 def safe_update_acell(worksheet, cell, value):
     return worksheet.update_acell(cell, value)
@@ -100,7 +100,6 @@ def process_handover(store):
         raw_data = sheet_continuous.get_values(store['read_range'])
         message_lines = []
         for row in raw_data:
-            # 使用逗號連接，完美還原 GAS 的顯示格式
             message_lines.append(",".join([str(cell) for cell in row if cell]))
         message = "\n".join(message_lines)
         
@@ -122,7 +121,7 @@ def process_handover(store):
         
     except Exception as e:
         print(f"🚨 嚴重警告：【{store['name']}】處理失敗，原因：{e}")
-        return # 👈 修正語法：在這裡使用 return 來結束錯誤狀態，主迴圈就會自動換下一家店！
+        return
 
 # ==========================================
 # 👑 啟動區：讓三家店排隊執行
@@ -130,3 +129,4 @@ def process_handover(store):
 if __name__ == "__main__":
     for store in STORES:
         process_handover(store)
+        time.sleep(2)  # 👈 新增：每處理完一家店，強制暫停 2 秒，避免被 Discord 阻擋
